@@ -6,5 +6,5 @@ Slack, Google Meet and other video applications.
 """
 
 __version__ = "0.1.0"
-__author__ = "Tomasz Czopek"
+__author__ = "LinuxShare Contributors"
 __license__ = "MIT"

@@ -6,4 +6,4 @@ linux-screen-share (0.1.0-1) unstable; urgency=medium
   * GTK4 GUI (linuxshare-gui) with monitor/window picker, tray icon and
     settings.
 
- -- Tomasz Czopek <tomasz.czopek@me.com>  Wed, 19 Aug 2026 10:00:00 +0000
+ -- LinuxShare Contributors  Wed, 19 Aug 2026 10:00:00 +0000

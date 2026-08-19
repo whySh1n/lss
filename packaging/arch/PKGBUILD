@@ -1,10 +1,10 @@
-# Maintainer: Tomasz Czopek <tomasz.czopek@me.com>
+# Maintainer: LinuxShare Contributors
 pkgname=linux-screen-share
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)"
 arch=('any')
-url="https://github.com/tomaszczopek/linux-screen-share"
+url="https://github.com/whySh1n/linux-screen-share"
 license=('MIT')
 depends=(
     'python'

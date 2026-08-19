@@ -146,9 +146,9 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
         about_kwargs = dict(
             application_name="LinuxShare",
             version=__version__,
-            developer_name="Tomasz Czopek",
+            developer_name="LinuxShare Contributors",
             license_type=Gtk.License.MIT_X11,
-            website="https://github.com/tomaszczopek/linux-screen-share",
+            website="https://github.com/whySh1n/linux-screen-share",
             comments="Share your Linux screen as a virtual webcam.",
         )
         if _HAVE_ADW and hasattr(Adw, "AboutWindow"):
@@ -161,7 +161,7 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
                 program_name="LinuxShare",
                 version=__version__,
                 license_type=Gtk.License.MIT_X11,
-                website="https://github.com/tomaszczopek/linux-screen-share",
+                website="https://github.com/whySh1n/linux-screen-share",
                 comments="Share your Linux screen as a virtual webcam.",
             )
             about.present()

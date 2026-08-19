@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "Tomasz Czopek", email = "tomasz.czopek@me.com" },
+    { name = "LinuxShare Contributors" },
 ]
 keywords = ["screen", "share", "webcam", "v4l2loopback", "wayland", "x11", "pipewire"]
 classifiers = [
@@ -36,9 +36,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/tomaszczopek/linux-screen-share"
-Repository = "https://github.com/tomaszczopek/linux-screen-share"
-Issues = "https://github.com/tomaszczopek/linux-screen-share/issues"
+Homepage = "https://github.com/whySh1n/linux-screen-share"
+Repository = "https://github.com/whySh1n/linux-screen-share"
+Issues = "https://github.com/whySh1n/linux-screen-share/issues"
 
 [project.scripts]
 linuxshare-cli = "linuxshare_cli.main:main"

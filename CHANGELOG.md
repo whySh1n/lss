@@ -32,5 +32,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop entry and SVG icon.
 - Unit tests and GitHub Actions CI (tests + lint).
 
-[Unreleased]: https://github.com/tomaszczopek/linux-screen-share/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/tomaszczopek/linux-screen-share/releases/tag/v0.1.0
+[Unreleased]: https://github.com/whySh1n/linux-screen-share/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/whySh1n/linux-screen-share/releases/tag/v0.1.0

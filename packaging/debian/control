@@ -1,13 +1,13 @@
 Source: linux-screen-share
 Section: video
 Priority: optional
-Maintainer: Tomasz Czopek <tomasz.czopek@me.com>
+Maintainer: LinuxShare Contributors
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                python3-all,
                python3-setuptools
 Standards-Version: 4.6.2
-Homepage: https://github.com/tomaszczopek/linux-screen-share
+Homepage: https://github.com/whySh1n/linux-screen-share
 Rules-Requires-Root: no
 
 Package: linux-screen-share

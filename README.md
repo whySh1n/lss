@@ -197,4 +197,4 @@ pytest tests/
 
 ## License
 
-[MIT](LICENSE) © Tomasz Czopek
+[MIT](LICENSE) © LinuxShare Contributors

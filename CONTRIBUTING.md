@@ -8,7 +8,7 @@ set up a development environment, run the tests, and submit changes.
 Requires Python 3.10+.
 
 ```bash
-git clone https://github.com/tomaszczopek/linux-screen-share.git
+git clone https://github.com/whySh1n/linux-screen-share.git
 cd linux-screen-share
 
 python -m venv .venv

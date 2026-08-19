@@ -5,5 +5,5 @@ streaming it into a v4l2loopback virtual camera.
 """
 
 __version__ = "0.1.0"
-__author__ = "Tomasz Czopek"
+__author__ = "LinuxShare Contributors"
 __license__ = "MIT"

@@ -17,7 +17,7 @@ except (ValueError, ImportError):  # pragma: no cover
 
 from .window import MainWindow  # noqa: E402
 
-APP_ID = "io.github.tomaszczopek.LinuxShare"
+APP_ID = "io.github.linuxshare.LinuxShare"
 
 _AppBase = Adw.Application if _HAVE_ADW else Gtk.Application
 

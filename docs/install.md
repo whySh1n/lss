@@ -67,7 +67,7 @@ options v4l2loopback exclusive_caps=1 card_label="LinuxShare Virtual Camera"
 ### From source (any distro)
 
 ```bash
-git clone https://github.com/tomaszczopek/linux-screen-share.git
+git clone https://github.com/whySh1n/linux-screen-share.git
 cd linux-screen-share
 pip install --user .
 ```
