@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# Debian packaging rules for linux-screen-share.
+
+export PYBUILD_NAME=linux-screen-share
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_install:
+	dh_install
+	install -Dm644 desktop/linuxshare.desktop \
+		debian/linux-screen-share/usr/share/applications/linuxshare.desktop
+	install -Dm644 icons/linuxshare.svg \
+		debian/linux-screen-share/usr/share/icons/hicolor/scalable/apps/linuxshare.svg
+	install -Dm644 man/linuxshare-cli.1 \
+		debian/linux-screen-share/usr/share/man/man1/linuxshare-cli.1

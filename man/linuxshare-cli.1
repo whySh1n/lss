@@ -1,0 +1,101 @@
+.TH LINUXSHARE-CLI 1 "August 2026" "linux-screen-share 0.1.0" "User Commands"
+.SH NAME
+linuxshare-cli \- share your Linux screen as a virtual webcam
+.SH SYNOPSIS
+.B linuxshare-cli
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B linuxshare-cli
+captures your screen under X11 or Wayland and pipes it into a
+.B v4l2loopback
+virtual camera device (for example
+.IR /dev/video0 ).
+The virtual camera can then be selected as a webcam in Microsoft Teams,
+Zoom, Slack, Google Meet and any other application that reads a V4L2
+device.
+.PP
+The session type is auto-detected from
+.B $XDG_SESSION_TYPE
+(falling back to
+.B $WAYLAND_DISPLAY
+and
+.BR $DISPLAY ).
+Under X11 the screen is grabbed with
+.BR ffmpeg 's
+.B x11grab
+input. Under Wayland the capture is performed via
+.B xdg-desktop-portal
+and
+.BR PipeWire ,
+which will prompt you to choose the screen or window to share.
+.SH OPTIONS
+.TP
+.BI \-\-display " NAME"
+Display/output to share (default: auto-detect the primary output). Only
+meaningful under X11; on Wayland the output is chosen through the portal.
+.TP
+.BI \-\-device " /dev/videoN"
+The v4l2loopback device to write to (default: first available loopback
+device).
+.TP
+.BI \-\-fps " N"
+Capture framerate in frames per second (default: 30).
+.TP
+.B \-\-list-displays
+List available displays/outputs and exit.
+.TP
+.B \-\-check
+Run a dependency check and exit with a non-zero status if a required
+dependency is missing.
+.TP
+.B \-\-version
+Print the program version and exit.
+.TP
+.B \-\-verbose
+Enable verbose/debug output on standard error.
+.TP
+.B \-h ", " \-\-help
+Show a help message and exit.
+.SH DEPENDENCIES
+.B ffmpeg\fR,
+.B v4l2loopback-dkms\fR,
+.B pipewire\fR,
+.B xdg-desktop-portal
+and, for Wayland capture,
+.B gstreamer
+with the
+.B good
+plugin set.
+.SH SIGNALS
+On
+.B SIGINT
+(Ctrl+C) or
+.B SIGTERM
+the capture process is terminated cleanly, and the
+.B v4l2loopback
+module is unloaded if it was loaded by this program.
+.SH FILES
+.TP
+.I ~/.config/linuxshare/config.json
+Settings shared with the GUI application.
+.SH EXAMPLES
+.TP
+Start sharing the primary screen:
+.B linuxshare-cli
+.TP
+Share a specific X11 output at 60 fps:
+.B linuxshare-cli --display HDMI-1 --fps 60
+.TP
+List displays:
+.B linuxshare-cli --list-displays
+.SH EXIT STATUS
+.B 0
+on success,
+.B 1
+on error (missing dependencies, no device, capture failure).
+.SH SEE ALSO
+.BR ffmpeg (1),
+.BR modprobe (8),
+.BR pw-record (1)
+.SH AUTHOR
+Tomasz Czopek <tomasz.czopek@me.com>

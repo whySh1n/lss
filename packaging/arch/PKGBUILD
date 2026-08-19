@@ -1,0 +1,48 @@
+# Maintainer: Tomasz Czopek <tomasz.czopek@me.com>
+pkgname=linux-screen-share
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)"
+arch=('any')
+url="https://github.com/tomaszczopek/linux-screen-share"
+license=('MIT')
+depends=(
+    'python'
+    'python-gobject'
+    'gtk4'
+    'libadwaita'
+    'ffmpeg'
+    'pipewire'
+    'xdg-desktop-portal'
+    'v4l2loopback-dkms'
+)
+optdepends=(
+    'gstreamer: Wayland capture pipeline'
+    'gst-plugins-good: v4l2sink / videoconvert elements'
+    'xdotool: X11 window listing in the GUI'
+    'xorg-xrandr: X11 display enumeration'
+    'libappindicator-gtk3: system tray icon'
+)
+makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+
+    # Desktop entry, icon and man page.
+    install -Dm644 desktop/linuxshare.desktop \
+        "$pkgdir/usr/share/applications/linuxshare.desktop"
+    install -Dm644 icons/linuxshare.svg \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/linuxshare.svg"
+    install -Dm644 man/linuxshare-cli.1 \
+        "$pkgdir/usr/share/man/man1/linuxshare-cli.1"
+    install -Dm644 LICENSE \
+        "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

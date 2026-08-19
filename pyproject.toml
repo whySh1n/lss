@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linux-screen-share"
+version = "0.1.0"
+description = "Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Tomasz Czopek", email = "tomasz.czopek@me.com" },
+]
+keywords = ["screen", "share", "webcam", "v4l2loopback", "wayland", "x11", "pipewire"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Capture",
+]
+dependencies = []
+
+[project.optional-dependencies]
+gui = ["PyGObject>=3.42"]
+dev = [
+    "pytest>=7.0",
+    "flake8>=6.0",
+    "black>=23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/tomaszczopek/linux-screen-share"
+Repository = "https://github.com/tomaszczopek/linux-screen-share"
+Issues = "https://github.com/tomaszczopek/linux-screen-share/issues"
+
+[project.scripts]
+linuxshare-cli = "linuxshare_cli.main:main"
+linuxshare-gui = "linuxshare_gui.main:main"
+
+[tool.setuptools]
+packages = ["linuxshare_cli", "linuxshare_gui"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

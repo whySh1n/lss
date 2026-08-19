@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 100
+extend-ignore = E203, W503, E402
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .venv,
+    *.egg-info
+per-file-ignores =
+    linuxshare_gui/picker.py:E402
+    linuxshare_gui/window.py:E402
+    linuxshare_gui/app.py:E402

@@ -1,0 +1,9 @@
+linux-screen-share (0.1.0-1) unstable; urgency=medium
+
+  * Initial release.
+  * CLI tool (linuxshare-cli) for X11 and Wayland screen capture into a
+    v4l2loopback virtual camera.
+  * GTK4 GUI (linuxshare-gui) with monitor/window picker, tray icon and
+    settings.
+
+ -- Tomasz Czopek <tomasz.czopek@me.com>  Wed, 19 Aug 2026 10:00:00 +0000

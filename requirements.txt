@@ -1,0 +1,11 @@
+# Runtime Python dependencies.
+#
+# The CLI (linuxshare_cli) uses only the Python standard library and the
+# external system tools ffmpeg / v4l2loopback / pipewire / gstreamer.
+#
+# The GUI (linuxshare_gui) requires PyGObject, which is best installed via
+# your distro's package manager (python3-gi / python-gobject) rather than
+# pip, because it needs the system GObject-Introspection libraries.
+#
+# Uncomment to install via pip (needs GObject dev headers present):
+# PyGObject>=3.42

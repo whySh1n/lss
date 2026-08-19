@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=LinuxShare
+GenericName=Screen Sharing
+Comment=Share your Linux screen as a virtual webcam
+Exec=linuxshare-gui
+Icon=linuxshare
+Terminal=false
+Categories=AudioVideo;Video;Utility;GTK;
+Keywords=screen;share;webcam;camera;capture;teams;zoom;meet;
+StartupNotify=true

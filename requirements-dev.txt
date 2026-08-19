@@ -1,0 +1,6 @@
+# Development dependencies.
+-r requirements.txt
+
+pytest>=7.0
+flake8>=6.0
+black>=23.0
