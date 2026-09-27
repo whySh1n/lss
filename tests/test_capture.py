@@ -1,6 +1,7 @@
 """Tests for capture logic and X11/Wayland detection."""
 
 from unittest import mock
+import io
 
 import pytest
 
@@ -103,10 +104,8 @@ def test_build_x11_command_with_display():
 
 
 def test_build_x11_command_without_display():
-    cmd = cap.build_x11_command("/dev/video1", None, fps=24, x11_display=":1")
-    assert "-video_size" not in cmd
-    assert ":1" in cmd
-    assert "24" in cmd
+    with pytest.raises(cap.CaptureError, match="Select an available"):
+        cap.build_x11_command("/dev/video1", None, fps=24, x11_display=":1")
 
 
 def test_build_wayland_command_requires_gstreamer():
@@ -118,9 +117,8 @@ def test_build_wayland_command_requires_gstreamer():
 def test_build_wayland_command_ok():
     with mock.patch("shutil.which", return_value="/usr/bin/gst-launch-1.0"):
         cmd = cap.build_wayland_command("/dev/video0", fps=30)
-    assert cmd[0] == "gst-launch-1.0"
-    assert "pipewiresrc" in cmd
-    assert "device=/dev/video0" in cmd
+    assert "linuxshare_cli.portal" in cmd
+    assert "/dev/video0" in cmd
 
 
 def test_build_capture_command_dispatch_x11():
@@ -142,6 +140,9 @@ def test_capture_session_start_stop():
     session = cap.CaptureSession("x11", "/dev/video0", d, 30)
 
     fake_proc = mock.Mock()
+    fake_proc.stderr = io.BytesIO()
+    fake_proc.stdout = None
+    fake_proc.stdin = io.BytesIO()
     fake_proc.poll.return_value = None
     with mock.patch("subprocess.Popen", return_value=fake_proc) as popen:
         session.start()
@@ -156,7 +157,7 @@ def test_capture_session_start_stop():
 
 
 def test_capture_session_start_failure_raises():
-    session = cap.CaptureSession("x11", "/dev/video0", None, 30)
+    session = cap.CaptureSession("x11", "/dev/video0", cap.Display("test", 640, 480), 30)
     with mock.patch("subprocess.Popen", side_effect=OSError("no ffmpeg")):
         with pytest.raises(cap.CaptureError):
             session.start()

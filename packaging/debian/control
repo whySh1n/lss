@@ -20,12 +20,15 @@ Depends: ${python3:Depends},
          gir1.2-adw-1,
          ffmpeg,
          pipewire,
+         gstreamer1.0-tools,
+         gstreamer1.0-pipewire,
+         gstreamer1.0-plugins-base,
+         gstreamer1.0-plugins-good,
+         x11-xserver-utils,
          xdg-desktop-portal,
          v4l2loopback-dkms
-Recommends: gstreamer1.0-tools,
-            gstreamer1.0-plugins-good,
-            xdotool,
-            x11-xserver-utils
+Recommends: xdotool,
+            gir1.2-ayatanaappindicator3-0.1
 Description: Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)
  LinuxShare captures your screen (or a selected window on X11) and streams
  it into a v4l2loopback virtual camera device. The virtual camera can then

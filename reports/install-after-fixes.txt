@@ -1,0 +1,24 @@
+Source: /home/tc/Documents/ChatGPT/Linux Screen Share
+Virtual environment: /tmp/linuxshare fixed install/lib/linuxshare-venv
+Launchers: /tmp/linuxshare fixed install/bin
+Creating environment; a failed install may leave this directory for inspection.
+Processing ./.
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: linux-screen-share
+  Building wheel for linux-screen-share (pyproject.toml): started
+  Building wheel for linux-screen-share (pyproject.toml): finished with status 'done'
+  Created wheel for linux-screen-share: filename=linux_screen_share-0.1.1-py3-none-any.whl size=30945 sha256=5fbf9cef1dd49bfb0beae5862868176d4a2b14d7322918807dc2e8646fa74ac5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-rchslk9d/wheels/1a/2d/48/85340308b600cf7c9f3e0e654c658c13baee43bb8de521f3cc
+Successfully built linux-screen-share
+Installing collected packages: linux-screen-share
+Successfully installed linux-screen-share-0.1.1
+linuxshare-cli 0.1.1
+
+Installed. Add /tmp/linuxshare fixed install/bin to PATH if needed.
+Run linuxshare-cli --check before use. See docs/install.md for OS dependencies.
+See reports/FIXES.md for validation results and remaining desktop test limits.

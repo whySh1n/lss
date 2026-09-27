@@ -22,6 +22,7 @@ class PickerWidget(Gtk.Box):
         self.session_type = gui_capture.detect_session_type()
         self._selected_display = None
         self._selected_window = None
+        self._window_list = None
         self._monitor_buttons: list[Gtk.ToggleButton] = []
 
         self._build_monitor_section()
@@ -54,7 +55,7 @@ class PickerWidget(Gtk.Box):
             else:
                 btn.set_group(group_leader)
             btn.connect("toggled", self._on_monitor_toggled, display)
-            if display.primary:
+            if display.primary or len(displays) == 1:
                 btn.set_active(True)
                 self._selected_display = display
             self._monitor_buttons.append(btn)
@@ -65,6 +66,8 @@ class PickerWidget(Gtk.Box):
         if button.get_active():
             self._selected_display = display
             self._selected_window = None
+            if self._window_list is not None:
+                self._window_list.unselect_all()
 
     # -- Windows (X11 only) ---------------------------------------------
 
@@ -91,6 +94,7 @@ class PickerWidget(Gtk.Box):
         scroller = Gtk.ScrolledWindow()
         scroller.set_min_content_height(120)
         listbox = Gtk.ListBox()
+        self._window_list = listbox
         listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
         for wid, title in windows:
             row = Gtk.ListBoxRow()
@@ -104,6 +108,7 @@ class PickerWidget(Gtk.Box):
     def _on_window_selected(self, listbox, row) -> None:  # noqa: ANN001
         if row is not None:
             self._selected_window = getattr(row, "window_id", None)
+            self._selected_display = None
             for btn in self._monitor_buttons:
                 btn.set_active(False)
 

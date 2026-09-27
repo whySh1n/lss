@@ -7,6 +7,7 @@ suitable for driving GTK status updates via ``GLib.idle_add``.
 from __future__ import annotations
 
 import threading
+import time
 from typing import Callable
 
 from linuxshare_cli import capture as _cap
@@ -72,6 +73,7 @@ class CaptureController:
     """
 
     STATE_IDLE = "idle"
+    STATE_STARTING = "starting"
     STATE_SHARING = "sharing"
     STATE_ERROR = "error"
 
@@ -79,8 +81,8 @@ class CaptureController:
         self.session: _cap.CaptureSession | None = None
         self.device: str | None = None
         self.state = self.STATE_IDLE
-        self._loaded_by_us = False
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
+        self._closed = False
         self.on_state_change: Callable[[str, str], None] | None = None
 
     def _emit(self, state: str, message: str = "") -> None:
@@ -88,61 +90,67 @@ class CaptureController:
         if self.on_state_change:
             self.on_state_change(state, message)
 
-    def start(
-        self,
-        display: Display | None = None,
-        fps: int = 30,
-        device: str | None = None,
-    ) -> None:
-        """Start a capture session (ensures the module + device exist)."""
+    def start(self, display=None, fps=30, device=None, window_id=None) -> None:
         with self._lock:
-            if self.state == self.STATE_SHARING:
+            if self._closed or (self.session and self.session.is_running()):
                 return
-
-            if not is_module_loaded():
-                ok, msg = load_module()
-                if not ok:
-                    self._emit(self.STATE_ERROR, msg)
-                    return
-                self._loaded_by_us = True
-
-            dev = pick_device(device)
-            if not dev:
-                self._emit(
-                    self.STATE_ERROR,
-                    "No v4l2loopback device found. Load the module first.",
-                )
-                return
-            self.device = dev
-
-            session_type = detect_session_type()
+            self._cleanup()
             try:
+                if not is_module_loaded():
+                    raise CaptureError(
+                        "Load the camera first: sudo modprobe v4l2loopback "
+                        "exclusive_caps=1 card_label='LinuxShare Virtual Camera'"
+                    )
+                dev = pick_device(device)
+                if not dev:
+                    raise CaptureError("No writable, verified loopback output device")
+                self.device = dev
                 self.session = _cap.CaptureSession(
-                    session_type=session_type,
-                    device=dev,
-                    display=display,
-                    fps=fps,
+                    detect_session_type(), dev, display, fps, window_id=window_id,
                 )
+                self._emit(self.STATE_STARTING, "Waiting for capture/portal consent")
                 self.session.start()
-            except CaptureError as exc:
+            except (CaptureError, OSError) as exc:
+                self._cleanup()
                 self._emit(self.STATE_ERROR, str(exc))
                 return
+            threading.Thread(target=self._watch, args=(self.session,),
+                             daemon=True).start()
 
-            self._emit(self.STATE_SHARING, dev)
+    def _watch(self, session):
+        while True:
+            with self._lock:
+                if self.session is not session:
+                    return
+                if not session.is_running():
+                    session.stop()
+                    message = session.error_message() or "Capture process exited"
+                    self.session = None
+                    self.device = None
+                    self._emit(self.STATE_ERROR, message)
+                    return
+                if self.state == self.STATE_STARTING and session.ready.is_set():
+                    self._emit(self.STATE_SHARING, self.device or "")
+            time.sleep(0.1)
+
+    def _cleanup(self):
+        if self.session is not None:
+            self.session.stop()
+            self.session = None
+        self.device = None
 
     def stop(self) -> None:
-        """Stop the active capture session."""
         with self._lock:
-            if self.session is not None:
-                self.session.stop()
-                self.session = None
-            if self._loaded_by_us:
-                unload_module()
-                self._loaded_by_us = False
-            self.device = None
-            self._emit(self.STATE_IDLE, "")
+            self._cleanup()
+            self._emit(self.STATE_IDLE)
+
+    def shutdown(self) -> None:
+        """Permanently reject queued starts before stopping the current child."""
+        with self._lock:
+            self._closed = True
+            self._cleanup()
+            self._emit(self.STATE_IDLE)
 
     def is_sharing(self) -> bool:
-        return self.state == self.STATE_SHARING and (
-            self.session is not None and self.session.is_running()
-        )
+        with self._lock:
+            return self.state in (self.STATE_STARTING, self.STATE_SHARING)

@@ -1,0 +1,25 @@
+Source: /home/tc/Documents/ChatGPT/Linux Screen Share
+Virtual environment: /tmp/linuxshare install review/lib/linuxshare-venv
+Launchers: /tmp/linuxshare install review/bin
+Creating environment; a failed install may leave this directory for inspection.
+Processing ./.
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: linux-screen-share
+  Building wheel for linux-screen-share (pyproject.toml): started
+  Building wheel for linux-screen-share (pyproject.toml): finished with status 'done'
+  Created wheel for linux-screen-share: filename=linux_screen_share-0.1.0-py3-none-any.whl size=25018 sha256=49ebfd7a919ccb7bfd099318235ba82b9519fd07f1282f4fd93493196e852662
+  Stored in directory: /tmp/pip-ephem-wheel-cache-_ey6dp1n/wheels/1a/2d/48/85340308b600cf7c9f3e0e654c658c13baee43bb8de521f3cc
+Successfully built linux-screen-share
+Installing collected packages: linux-screen-share
+Successfully installed linux-screen-share-0.1.0
+linuxshare-cli 0.1.0
+
+Installed. Add /tmp/linuxshare install review/bin to PATH if needed.
+Run linuxshare-cli --check before use. See docs/install.md for OS dependencies.
+Known limitations: Wayland portal capture and X11 window isolation are incomplete.
+Do not use window sharing for sensitive material. See reports/REVIEW.md.

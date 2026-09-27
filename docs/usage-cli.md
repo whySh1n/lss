@@ -46,8 +46,8 @@ linuxshare-cli [OPTIONS]
 
 4. **Select the camera** in Teams/Zoom/Slack/Meet.
 
-5. **Stop** with `Ctrl+C`. LinuxShare terminates ffmpeg/GStreamer and unloads
-   the module if it loaded it.
+5. **Stop** with `Ctrl+C`. LinuxShare terminates capture processes and closes
+   portal sessions. Kernel modules remain loaded for other applications.
 
 ## Examples
 

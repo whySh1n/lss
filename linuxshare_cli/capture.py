@@ -11,6 +11,9 @@ import os
 import re
 import shutil
 import subprocess
+import sys
+import threading
+from collections import deque
 from dataclasses import dataclass
 
 
@@ -61,7 +64,7 @@ def _parse_xrandr(output: str) -> list[Display]:
     # Matches: "HDMI-1 connected primary 1920x1080+0+0 ..."
     line_re = re.compile(
         r"^(?P<name>\S+)\s+connected\s+(?P<primary>primary\s+)?"
-        r"(?P<w>\d+)x(?P<h>\d+)\+(?P<x>\d+)\+(?P<y>\d+)"
+        r"(?P<w>\d+)x(?P<h>\d+)(?P<x>[+-]\d+)(?P<y>[+-]\d+)"
     )
     for line in output.splitlines():
         m = line_re.match(line)
@@ -138,9 +141,17 @@ def build_x11_command(
     display: Display | None,
     fps: int = 30,
     x11_display: str | None = None,
+    window_id: str | None = None,
 ) -> list[str]:
     """Build the ffmpeg command capturing an X11 screen into *device*."""
+    validate_options(device, fps)
     x11_display = x11_display or os.environ.get("DISPLAY", ":0")
+    if window_id is not None:
+        if not window_id.isdecimal() or int(window_id) <= 0:
+            raise CaptureError("Invalid X11 window ID")
+        display = None
+    elif display is None or display.width <= 0 or display.height <= 0:
+        raise CaptureError("Select an available monitor or window")
     if display and display.width and display.height:
         video_size = display.resolution
         grab = f"{x11_display}+{display.offset}"
@@ -149,6 +160,8 @@ def build_x11_command(
         grab = x11_display
 
     cmd = ["ffmpeg", "-loglevel", "error", "-f", "x11grab", "-framerate", str(fps)]
+    if window_id:
+        cmd += ["-window_id", window_id]
     if video_size:
         cmd += ["-video_size", video_size]
     cmd += ["-i", grab]
@@ -162,30 +175,19 @@ def build_x11_command(
     return cmd
 
 
-def build_wayland_command(device: str, fps: int = 30) -> list[str]:
-    """Build a GStreamer command for Wayland screencast into *device*.
+def validate_options(device: str, fps: int) -> None:
+    if not re.fullmatch(r"/dev/video[0-9]+", device):
+        raise CaptureError("Choose a /dev/videoN loopback device")
+    if type(fps) is not int or not 1 <= fps <= 60:
+        raise CaptureError("Framerate must be between 1 and 60 FPS")
 
-    Uses ``pipewiresrc`` fed by the xdg-desktop-portal ScreenCast session.
-    The portal will prompt the user to select a screen/window.
-    """
+
+def build_wayland_command(device: str, fps: int = 30) -> list[str]:
+    """Run the helper that owns portal consent and the authorized stream."""
+    validate_options(device, fps)
     if not shutil.which("gst-launch-1.0"):
-        raise CaptureError(
-            "gst-launch-1.0 not found. Install GStreamer "
-            "(Arch: gstreamer gst-plugins-good; Debian: gstreamer1.0-tools "
-            "gstreamer1.0-plugins-good) for Wayland capture."
-        )
-    return [
-        "gst-launch-1.0",
-        "-e",
-        "pipewiresrc",
-        "!",
-        "videoconvert",
-        "!",
-        f"video/x-raw,framerate={fps}/1,format=YUY2",
-        "!",
-        "v4l2sink",
-        f"device={device}",
-    ]
+        raise CaptureError("gst-launch-1.0 not found; install GStreamer")
+    return [sys.executable, "-m", "linuxshare_cli.portal", device, str(fps)]
 
 
 def build_capture_command(
@@ -193,12 +195,13 @@ def build_capture_command(
     device: str,
     display: Display | None = None,
     fps: int = 30,
+    window_id: str | None = None,
 ) -> list[str]:
     """Build the appropriate capture command for the session type."""
     if session_type == "wayland":
         return build_wayland_command(device, fps=fps)
     if session_type == "x11":
-        return build_x11_command(device, display, fps=fps)
+        return build_x11_command(device, display, fps=fps, window_id=window_id)
     raise CaptureError(
         f"Unsupported or undetected session type: {session_type!r}. "
         "Set XDG_SESSION_TYPE to 'x11' or 'wayland'."
@@ -214,26 +217,61 @@ class CaptureSession:
         device: str,
         display: Display | None = None,
         fps: int = 30,
+        window_id: str | None = None,
     ) -> None:
         self.session_type = session_type
         self.device = device
         self.display = display
         self.fps = fps
-        self.command = build_capture_command(session_type, device, display, fps)
+        self.command = build_capture_command(session_type, device, display, fps, window_id)
         self.process: subprocess.Popen | None = None
+        self._readers: list[threading.Thread] = []
+        self._errors = deque(maxlen=16)
+        self.ready = threading.Event()
+
+    def _drain(self, stream, status=False):
+        try:
+            while True:
+                chunk = stream.read(4096) if not status else stream.readline(4096)
+                if not chunk:
+                    break
+                if status:
+                    if chunk.strip() == b"LINUXSHARE_READY":
+                        self.ready.set()
+                else:
+                    self._errors.append(chunk)
+        finally:
+            stream.close()
+
+    def error_message(self) -> str:
+        return b"".join(list(self._errors)).decode("utf-8", "replace").strip()
 
     def start(self) -> None:
         """Start the capture subprocess."""
         if self.process is not None and self.process.poll() is None:
             raise CaptureError("Capture already running.")
+        self._errors.clear()
+        self.ready.clear()
         try:
             self.process = subprocess.Popen(  # noqa: S603
-                self.command,
-                stdout=subprocess.PIPE,
+                ([sys.executable, "-m", "linuxshare_cli.worker", *self.command]
+                 if self.session_type == "x11" else self.command),
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE if self.session_type == "wayland" else subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
         except (OSError, subprocess.SubprocessError) as exc:
             raise CaptureError(f"Failed to start capture: {exc}") from exc
+        self._readers = []
+        for stream, status in ((self.process.stderr, False),
+                               (self.process.stdout, True)):
+            if stream is not None:
+                reader = threading.Thread(target=self._drain,
+                                          args=(stream, status), daemon=True)
+                reader.start()
+                self._readers.append(reader)
+        if self.session_type == "x11":
+            self.ready.set()
 
     def is_running(self) -> bool:
         return self.process is not None and self.process.poll() is None
@@ -242,6 +280,8 @@ class CaptureSession:
         """Terminate the capture subprocess cleanly."""
         if self.process is None:
             return
+        if self.process.stdin:
+            self.process.stdin.close()
         if self.process.poll() is None:
             self.process.terminate()
             try:
@@ -249,4 +289,8 @@ class CaptureSession:
             except subprocess.TimeoutExpired:  # pragma: no cover
                 self.process.kill()
                 self.process.wait()
+        for reader in self._readers:
+            reader.join(timeout=1)
+        self._readers.clear()
         self.process = None
+        self.ready.clear()

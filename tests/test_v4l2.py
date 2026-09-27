@@ -104,7 +104,7 @@ def test_unload_module_success_as_root():
 
 
 def test_pick_device_prefers_existing():
-    with mock.patch("os.path.exists", return_value=True):
+    with mock.patch.object(v4l2, "is_loopback_device", return_value=True):
         assert v4l2.pick_device("/dev/video9") == "/dev/video9"
 
 

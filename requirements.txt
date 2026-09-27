@@ -1,7 +1,8 @@
 # Runtime Python dependencies.
 #
-# The CLI (linuxshare_cli) uses only the Python standard library and the
-# external system tools ffmpeg / v4l2loopback / pipewire / gstreamer.
+# X11 capture uses the Python standard library and external FFmpeg.
+# Wayland capture also requires distro PyGObject (Gio) for portal consent,
+# plus GStreamer, PipeWire and a desktop portal backend.
 #
 # The GUI (linuxshare_gui) requires PyGObject, which is best installed via
 # your distro's package manager (python3-gi / python-gobject) rather than

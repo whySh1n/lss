@@ -1,4 +1,4 @@
-.TH LINUXSHARE-CLI 1 "August 2026" "linux-screen-share 0.1.0" "User Commands"
+.TH LINUXSHARE-CLI 1 "September 2026" "linux-screen-share 0.1.1" "User Commands"
 .SH NAME
 linuxshare-cli \- share your Linux screen as a virtual webcam
 .SH SYNOPSIS
@@ -73,7 +73,7 @@ On
 .B SIGTERM
 the capture process is terminated cleanly, and the
 .B v4l2loopback
-module is unloaded if it was loaded by this program.
+module remains loaded; manage it separately as an administrator.
 .SH FILES
 .TP
 .I ~/.config/linuxshare/config.json

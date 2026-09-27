@@ -1,99 +1,57 @@
-"""System tray icon with AppIndicator, falling back to Gtk.StatusIcon.
-
-Tray support on Linux is fragmented. This module attempts, in order:
-
-1. ``AyatanaAppIndicator3`` / ``AppIndicator3`` (works under most desktops
-   and Wayland via the StatusNotifierItem spec).
-2. A no-op stub if neither is available, so the app still runs.
-"""
-
+"""Run GTK3 AppIndicator in a helper, isolated from the GTK4 application."""
 from __future__ import annotations
 
-from typing import Callable
+import subprocess
+import sys
+import threading
 
 
 class TrayIcon:
-    """Abstraction over the available tray backend."""
+    def __init__(self, on_show, on_stop, on_quit, icon_name="linuxshare"):
+        from gi.repository import GLib
 
-    def __init__(
-        self,
-        on_show: Callable[[], None],
-        on_stop: Callable[[], None],
-        on_quit: Callable[[], None],
-        icon_name: str = "linuxshare",
-    ) -> None:
-        self.on_show = on_show
-        self.on_stop = on_stop
-        self.on_quit = on_quit
-        self.icon_name = icon_name
-        self._backend = None
-        self._indicator = None
-        self._setup()
+        self._actions = {"show": on_show, "stop": on_stop, "quit": on_quit}
+        self._idle_add = GLib.idle_add
+        self._process = subprocess.Popen(
+            [sys.executable, "-m", "linuxshare_gui.tray_helper", icon_name],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, text=True,
+        )
+        threading.Thread(target=self._read, daemon=True).start()
 
-    def _setup(self) -> None:  # pragma: no cover - depends on system libs
-        indicator = self._try_appindicator()
-        if indicator is not None:
-            self._backend = "appindicator"
-            self._indicator = indicator
-            return
-        self._backend = "none"
+    def _read(self):
+        with self._process.stdout as stream:
+            for line in stream:
+                action = self._actions.get(line.strip())
+                if action:
+                    self._idle_add(self._dispatch, action)
 
-    def _build_menu(self):  # pragma: no cover - requires GTK
-        import gi
-
-        gi.require_version("Gtk", "4.0")
-        from gi.repository import Gtk
-
-        menu = Gtk.Menu() if hasattr(Gtk, "Menu") else None
-        if menu is None:
-            # GTK4 dropped Gtk.Menu; AppIndicator needs GTK3 menus. When only
-            # GTK4 is present we expose actions via the app instead.
-            return None
-        show_item = Gtk.MenuItem(label="Show window")
-        show_item.connect("activate", lambda *_: self.on_show())
-        stop_item = Gtk.MenuItem(label="Stop sharing")
-        stop_item.connect("activate", lambda *_: self.on_stop())
-        quit_item = Gtk.MenuItem(label="Quit")
-        quit_item.connect("activate", lambda *_: self.on_quit())
-        for item in (show_item, stop_item, quit_item):
-            menu.append(item)
-        menu.show_all()
-        return menu
-
-    def _try_appindicator(self):  # pragma: no cover - depends on system libs
-        import gi
-
-        for lib, ver in (("AyatanaAppIndicator3", "0.1"), ("AppIndicator3", "0.1")):
-            try:
-                gi.require_version(lib, ver)
-                mod = __import__("gi.repository", fromlist=[lib])
-                appindicator = getattr(mod, lib)
-            except (ValueError, ImportError, AttributeError):
-                continue
-
-            menu = self._build_menu()
-            if menu is None:
-                continue
-            indicator = appindicator.Indicator.new(
-                "linuxshare",
-                self.icon_name,
-                appindicator.IndicatorCategory.APPLICATION_STATUS,
-            )
-            indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
-            indicator.set_menu(menu)
-            return indicator
-        return None
+    @staticmethod
+    def _dispatch(action):
+        action()
+        return False
 
     @property
-    def available(self) -> bool:
-        """Whether a real tray backend is active."""
-        return self._backend == "appindicator"
+    def available(self):
+        return self._process.poll() is None
 
-    def set_sharing(self, sharing: bool) -> None:  # pragma: no cover
-        """Update the icon/label to reflect sharing state."""
-        if self._backend == "appindicator" and self._indicator is not None:
-            label = "Sharing" if sharing else ""
+    def set_sharing(self, sharing):
+        if self.available:
             try:
-                self._indicator.set_label(label, "")
-            except Exception:  # noqa: BLE001
-                pass
+                self._process.stdin.write("sharing\n" if sharing else "idle\n")
+                self._process.stdin.flush()
+            except (BrokenPipeError, OSError):
+                self.close()
+
+    def close(self):
+        try:
+            self._process.stdin.close()
+        except (BrokenPipeError, OSError):
+            pass  # Helper already exited.
+        if self.available:
+            self._process.terminate()
+            try:
+                self._process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                self._process.kill()
+                self._process.wait()

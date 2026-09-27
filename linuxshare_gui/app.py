@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import gi
+import signal
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gio, Gtk  # noqa: E402
+from gi.repository import Gio, GLib, Gtk  # noqa: E402
 
 try:
     gi.require_version("Adw", "1")
@@ -39,6 +40,12 @@ class LinuxShareApp(_AppBase):  # type: ignore[misc, valid-type]
         self._add_action("about", self._on_about)
         self._add_action("stop", self._on_stop)
         self._add_action("quit", self._on_quit)
+        for signum in (signal.SIGINT, signal.SIGTERM):
+            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signum, self._signal_quit)
+
+    def _signal_quit(self):
+        self._quit()
+        return False
 
     def do_activate(self) -> None:
         if self.window is None:
@@ -84,10 +91,14 @@ class LinuxShareApp(_AppBase):  # type: ignore[misc, valid-type]
     def _on_quit(self, *_args) -> None:
         self._quit()
 
+    def do_shutdown(self) -> None:
+        if self.window is not None:
+            self.window.controller.shutdown()
+        if self.tray is not None:
+            self.tray.close()
+        _AppBase.do_shutdown(self)
+
     def _quit(self) -> None:
         if self.window is not None:
-            try:
-                self.window.controller.stop()
-            except Exception:  # noqa: BLE001
-                pass
+            self.window.controller.shutdown()
         self.quit()

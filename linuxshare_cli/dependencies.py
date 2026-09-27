@@ -12,49 +12,49 @@ import subprocess
 from dataclasses import dataclass
 
 # Map of executable name -> human friendly package hints per distro.
-REQUIRED_COMMANDS = {
-    "ffmpeg": {
-        "description": "FFmpeg (screen capture / encoding)",
-        "arch": "ffmpeg",
-        "debian": "ffmpeg",
-    },
-}
-
-# Commands that are only needed for a specific session type.
+REQUIRED_COMMANDS = {}
 X11_COMMANDS = {
-    "xrandr": {
-        "description": "xrandr (X11 display enumeration)",
-        "arch": "xorg-xrandr",
-        "debian": "x11-xserver-utils",
-    },
+    "ffmpeg": {"description": "X11 capture", "arch": "ffmpeg", "debian": "ffmpeg"},
+    "xrandr": {"description": "Monitor enumeration", "arch": "xorg-xrandr",
+               "debian": "x11-xserver-utils"},
 }
-
 WAYLAND_COMMANDS = {
-    "pw-record": {
-        "description": "PipeWire tools (Wayland screencast)",
-        "arch": "pipewire",
-        "debian": "pipewire-bin",
-    },
+    "gst-launch-1.0": {"description": "Wayland capture pipeline", "arch": "gstreamer",
+                       "debian": "gstreamer1.0-tools"},
+    "gst-inspect-1.0": {"description": "Pipeline plugin checks", "arch": "gstreamer",
+                        "debian": "gstreamer1.0-tools"},
+}
+OPTIONAL_COMMANDS = {
+    "xdotool": {"description": "X11 window listing", "arch": "xdotool",
+                "debian": "xdotool"},
 }
 
-# Optional but recommended commands (do not hard-fail).
-OPTIONAL_COMMANDS = {
-    "gst-launch-1.0": {
-        "description": "GStreamer (alternative Wayland pipeline)",
-        "arch": "gstreamer",
-        "debian": "gstreamer1.0-tools",
-    },
-    "xdotool": {
-        "description": "xdotool (X11 window listing)",
-        "arch": "xdotool",
-        "debian": "xdotool",
-    },
-    "xwininfo": {
-        "description": "xwininfo (X11 window geometry)",
-        "arch": "xorg-xwininfo",
-        "debian": "x11-utils",
-    },
-}
+
+def gst_element_available(element):
+    try:
+        return subprocess.run(["gst-inspect-1.0", element],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                              timeout=5, check=False).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def portal_available():
+    try:
+        from gi.repository import Gio, GLib
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        value = bus.call_sync(
+            "org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+            "org.freedesktop.DBus.Properties", "Get",
+            GLib.Variant("(ss)", ("org.freedesktop.portal.ScreenCast",
+                                  "AvailableSourceTypes")),
+            None, Gio.DBusCallFlags.NONE, 3000, None,
+        )
+        return bool(value.unpack()[0] & 3)
+    except (ImportError, ValueError, RuntimeError):
+        return False
+    except Exception:
+        return False  # D-Bus unavailable or portal backend does not implement screencast.
 
 
 @dataclass
@@ -126,6 +126,20 @@ def check_dependencies(session_type: str | None = None) -> list[DependencyResult
         results.extend(_scan(WAYLAND_COMMANDS, optional=(session_type is None)))
 
     results.extend(_scan(OPTIONAL_COMMANDS, optional=True))
+    if session_type in (None, "wayland"):
+        for element, arch, debian in (
+            ("pipewiresrc", "gst-plugin-pipewire", "gstreamer1.0-pipewire"),
+            ("videoconvert", "gst-plugins-base", "gstreamer1.0-plugins-base"),
+            ("videorate", "gst-plugins-base", "gstreamer1.0-plugins-base"),
+            ("v4l2sink", "gst-plugins-good", "gstreamer1.0-plugins-good"),
+        ):
+            results.append(DependencyResult(
+                element, "GStreamer element", gst_element_available(element),
+                session_type is None, arch, debian))
+        results.append(DependencyResult(
+            "ScreenCast portal", "PyGObject and a working desktop portal backend",
+            portal_available(), session_type is None,
+            "python-gobject xdg-desktop-portal", "python3-gi xdg-desktop-portal"))
 
     # v4l2loopback kernel module.
     results.append(
@@ -163,4 +177,5 @@ def format_report(results: list[DependencyResult]) -> str:
         deb_pkgs = " ".join(sorted({m.debian_pkg for m in missing}))
         lines.append(f"  Arch:   sudo pacman -S {arch_pkgs}")
         lines.append(f"  Debian: sudo apt install {deb_pkgs}")
+        lines.append("  Also install your desktop's portal backend and matching kernel headers.")
     return "\n".join(lines)

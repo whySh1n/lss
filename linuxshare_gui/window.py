@@ -36,6 +36,7 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
         self.controller.on_state_change = self._on_state_change_threadsafe
 
         self._build_ui()
+        self.connect("close-request", self._on_close_request)
 
     # -- UI construction -------------------------------------------------
 
@@ -87,6 +88,8 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
 
     def start_sharing(self) -> None:
         display = self.picker.get_selected_display()
+        window_id = self.picker.get_selected_window()
+        self.share_button.set_sensitive(False)
         self._set_status("Starting...")
         # Run start in a thread so the UI stays responsive.
         import threading
@@ -95,6 +98,7 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
             target=self.controller.start,
             kwargs={
                 "display": display,
+                "window_id": window_id,
                 "fps": self.config.fps,
                 "device": self.config.device or None,
             },
@@ -111,10 +115,26 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
     def _on_state_change_threadsafe(self, state: str, message: str) -> None:
         GLib.idle_add(self._apply_state, state, message)
 
+    def _on_close_request(self, *_args):
+        self.controller.shutdown()
+        self.get_application().quit()
+        return False
+
     def _apply_state(self, state: str, message: str) -> bool:
+        self.share_button.set_sensitive(True)
+        self.picker.set_sensitive(state not in (
+            gui_capture.CaptureController.STATE_STARTING,
+            gui_capture.CaptureController.STATE_SHARING,
+        ))
+        if self.get_application().tray:
+            self.get_application().tray.set_sharing(
+                state == gui_capture.CaptureController.STATE_SHARING)
         if state == gui_capture.CaptureController.STATE_SHARING:
             self.share_button.set_label("Stop sharing")
             self._set_status(f"Sharing on {message}")
+        elif state == gui_capture.CaptureController.STATE_STARTING:
+            self.share_button.set_label("Cancel sharing")
+            self._set_status(message)
         elif state == gui_capture.CaptureController.STATE_ERROR:
             self.share_button.set_label("Start sharing")
             self._set_status(f"Error: {message}", error=True)

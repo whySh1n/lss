@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
+import sys
 from dataclasses import asdict, dataclass
 
 CONFIG_DIR = os.path.join(
@@ -48,20 +50,29 @@ def load_config(path: str = CONFIG_PATH) -> Config:
         return default_config()
     if not isinstance(data, dict):
         return default_config()
+    fps = data.get("fps", 30)
     cfg = Config(
-        fps=int(data.get("fps", 30)) if str(data.get("fps", "")).strip() else 30,
-        device=str(data.get("device", "")),
-        autostart=bool(data.get("autostart", False)),
+        fps=fps if type(fps) is int else 30,
+        device=data.get("device", "") if isinstance(data.get("device", ""), str) else "",
+        autostart=data.get("autostart") is True,
     )
     return cfg.normalise()
 
 
 def save_config(config: Config, path: str = CONFIG_PATH) -> None:
-    """Persist *config* to *path*, creating directories as needed."""
-    directory = os.path.dirname(path)
-    os.makedirs(directory, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(asdict(config.normalise()), fh, indent=2)
+    """Atomically replace configuration, with private file permissions."""
+    directory = os.path.dirname(os.path.abspath(path))
+    os.makedirs(directory, mode=0o700, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".linuxshare-", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(asdict(config.normalise()), fh, indent=2)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 # --- Autostart (XDG desktop entry) --------------------------------------
@@ -75,7 +86,7 @@ AUTOSTART_PATH = os.path.join(AUTOSTART_DIR, "linuxshare-gui.desktop")
 _AUTOSTART_ENTRY = """[Desktop Entry]
 Type=Application
 Name=LinuxShare
-Exec=linuxshare-gui
+Exec={executable} -m linuxshare_gui.main
 Icon=linuxshare
 X-GNOME-Autostart-enabled=true
 Comment=Start LinuxShare screen sharing on login
@@ -87,7 +98,9 @@ def set_autostart(enabled: bool) -> None:
     if enabled:
         os.makedirs(AUTOSTART_DIR, exist_ok=True)
         with open(AUTOSTART_PATH, "w", encoding="utf-8") as fh:
-            fh.write(_AUTOSTART_ENTRY)
+            executable = sys.executable.replace("\\", "\\\\").replace('"', '\\"')
+            executable = executable.replace("$", "\\$").replace("`", "\\`").replace("%", "%%")
+            fh.write(_AUTOSTART_ENTRY.format(executable='"' + executable + '"'))
     else:
         try:
             os.remove(AUTOSTART_PATH)
@@ -136,8 +149,8 @@ def build_settings_dialog(parent, config: Config, on_save):  # pragma: no cover
     # Device selector.
     dev_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
     dev_row.append(Gtk.Label(label="Virtual camera device:", xalign=0))
-    devices = [d.path for d in gui_capture.list_loopback_devices()] or ["/dev/video0"]
-    dev_combo = Gtk.DropDown.new_from_strings(devices)
+    devices = [""] + [d.path for d in gui_capture.list_loopback_devices()]
+    dev_combo = Gtk.DropDown.new_from_strings(["Auto (verified loopback only)"] + devices[1:])
     if config.device in devices:
         dev_combo.set_selected(devices.index(config.device))
     dev_row.append(dev_combo)

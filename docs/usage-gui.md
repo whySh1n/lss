@@ -42,7 +42,7 @@ Open **☰ → Settings**:
 - **Virtual camera device** — choose which `/dev/videoN` to use
 - **Start on login** — installs an autostart entry
 
-Settings are saved to `~/.config/linuxshare/config.json` and shared with the CLI.
+Settings are saved to `~/.config/linuxshare/config.json` and used by the GUI. CLI options are supplied separately.
 
 ## Selecting the camera
 
@@ -52,3 +52,9 @@ app was already open, restart it so it re-scans cameras.
 ## About
 
 **☰ → About** shows the version, license and project link.
+
+Closing the window cancels pending consent and stops capture. Startup on login
+opens the application; it never starts sharing automatically. The tray helper
+is optional and uses GTK3 separately from the GTK4 UI. X11 window selection
+passes an explicit FFmpeg window ID; it never falls back to the monitor.
+Window occlusion may affect pixels on X11; Wayland uses portal-selected sources.

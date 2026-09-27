@@ -1,3 +1,12 @@
+# Changes in 0.1.1
+
+- Implement Wayland ScreenCast consent, authorized PipeWire FD transfer and cancellation.
+- Capture explicit X11 window IDs; reject missing sources and invalid devices/FPS.
+- Drain bounded diagnostics, supervise capture children and stop on close or parent exit.
+- Recover GUI capture state after backend failures; keep kernel modules administrator-managed.
+- Validate and atomically save settings; isolate the optional GTK3 tray from GTK4.
+- Correct dependency checks and packaging; add a user-local installer and CI.
+
 # Changelog
 
 All notable changes to this project are documented in this file.

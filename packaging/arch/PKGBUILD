@@ -1,7 +1,7 @@
 # Maintainer: LinuxShare Contributors
 pkgname=linux-screen-share
-pkgver=0.1.0
-pkgrel=1
+pkgver=0.1.1
+pkgrel=2
 pkgdesc="Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)"
 arch=('any')
 url="https://github.com/whySh1n/linux-screen-share"
@@ -13,28 +13,33 @@ depends=(
     'libadwaita'
     'ffmpeg'
     'pipewire'
+    'gstreamer'
+    'gst-plugin-pipewire'
+    'gst-plugins-base'
+    'gst-plugins-good'
+    'xorg-xrandr'
     'xdg-desktop-portal'
     'v4l2loopback-dkms'
 )
 optdepends=(
-    'gstreamer: Wayland capture pipeline'
-    'gst-plugins-good: v4l2sink / videoconvert elements'
     'xdotool: X11 window listing in the GUI'
-    'xorg-xrandr: X11 display enumeration'
     'libappindicator-gtk3: system tray icon'
 )
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
-source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+# Local checkout recipe: no unverified remote release archives.
+# Run from packaging/arch in a trusted checkout. Release recipes must use
+# independently verified checksums before adding downloaded source archives.
+source=()
+sha256sums=()
 
 build() {
-    cd "$srcdir/$pkgname-$pkgver"
-    python -m build --wheel --no-isolation
+    cd "$startdir/../.."
+    python -m build --wheel --no-isolation --outdir "$srcdir/wheels"
 }
 
 package() {
-    cd "$srcdir/$pkgname-$pkgver"
-    python -m installer --destdir="$pkgdir" dist/*.whl
+    cd "$startdir/../.."
+    python -m installer --destdir="$pkgdir" "$srcdir"/wheels/*.whl
 
     # Desktop entry, icon and man page.
     install -Dm644 desktop/linuxshare.desktop \

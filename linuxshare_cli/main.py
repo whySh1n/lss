@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import signal
+import shlex
 import sys
 import time
 
@@ -86,9 +87,14 @@ def run(argv: list[str] | None = None) -> int:
     """Main program logic. Returns an exit code."""
     parser = build_parser()
     args = parser.parse_args(argv)
+    if not 1 <= args.fps <= 60:
+        parser.error("--fps must be between 1 and 60")
 
     session_type = cap.detect_session_type()
     _log(args.verbose, f"Detected session type: {session_type}")
+
+    if args.list_displays:
+        return cmd_list_displays(session_type)
 
     # Dependency check.
     results = deps.check_dependencies(
@@ -97,9 +103,6 @@ def run(argv: list[str] | None = None) -> int:
     if args.check:
         print(deps.format_report(results))
         return 0 if not deps.missing_required(results) else 1
-
-    if args.list_displays:
-        return cmd_list_displays(session_type)
 
     missing = deps.missing_required(results)
     if missing:
@@ -114,15 +117,11 @@ def run(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    # Ensure v4l2loopback is available.
-    loaded_by_us = False
+    # System-wide modules are managed by the administrator, not a capture app.
     if not v4l2.is_module_loaded():
-        _log(args.verbose, "v4l2loopback not loaded; attempting to load.")
-        ok, msg = v4l2.load_module()
-        print(msg)
-        if not ok:
-            return 1
-        loaded_by_us = True
+        print("Load the camera first: sudo " + shlex.join(
+            v4l2.modprobe_command()), file=sys.stderr)
+        return 1
 
     device = v4l2.pick_device(args.device)
     if not device:
@@ -131,8 +130,6 @@ def run(argv: list[str] | None = None) -> int:
             "(sudo modprobe v4l2loopback).",
             file=sys.stderr,
         )
-        if loaded_by_us:
-            v4l2.unload_module()
         return 1
 
     # Pick display (X11); Wayland uses the portal.
@@ -142,8 +139,6 @@ def run(argv: list[str] | None = None) -> int:
         display = cap.pick_display(displays, args.display)
         if args.display and display is None:
             print(f"Display {args.display!r} not found.", file=sys.stderr)
-            if loaded_by_us:
-                v4l2.unload_module()
             return 1
 
     try:
@@ -155,8 +150,6 @@ def run(argv: list[str] | None = None) -> int:
         )
     except cap.CaptureError as exc:
         print(f"Error: {exc}", file=sys.stderr)
-        if loaded_by_us:
-            v4l2.unload_module()
         return 1
 
     _log(args.verbose, f"Capture command: {' '.join(session.command)}")
@@ -173,13 +166,11 @@ def run(argv: list[str] | None = None) -> int:
         session.start()
     except cap.CaptureError as exc:
         print(f"Error: {exc}", file=sys.stderr)
-        if loaded_by_us:
-            v4l2.unload_module()
         return 1
 
     if session_type == "wayland":
         print("A desktop portal prompt may ask which screen/window to share.")
-    print(f"Sharing screen -> {device}")
+    print(f"Starting capture -> {device}")
     print(f"Select '{v4l2.DEFAULT_CARD_LABEL}' as your camera in your video app.")
     print("Press Ctrl+C to stop.")
 
@@ -188,10 +179,8 @@ def run(argv: list[str] | None = None) -> int:
         while not stop_requested["flag"]:
             if not session.is_running():
                 # Process ended unexpectedly.
-                err = b""
-                if session.process and session.process.stderr:
-                    err = session.process.stderr.read() or b""
-                msg = err.decode("utf-8", "replace").strip()
+                session.stop()
+                msg = session.error_message()
                 print(
                     f"Capture stopped unexpectedly.{(' ' + msg) if msg else ''}",
                     file=sys.stderr,
@@ -202,9 +191,6 @@ def run(argv: list[str] | None = None) -> int:
     finally:
         print("\nStopping capture...")
         session.stop()
-        if loaded_by_us:
-            ok, msg = v4l2.unload_module()
-            _log(args.verbose, msg)
 
     return exit_code
 

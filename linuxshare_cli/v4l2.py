@@ -5,6 +5,11 @@ from __future__ import annotations
 import glob
 import os
 import shutil
+import shlex
+import stat
+import re
+import fcntl
+import struct
 import subprocess
 from dataclasses import dataclass
 
@@ -47,24 +52,38 @@ def is_module_loaded(module: str = "v4l2loopback") -> bool:
     return False
 
 
-def list_loopback_devices() -> list[LoopbackDevice]:
-    """List v4l2loopback devices currently present on the system.
+def is_loopback_device(path: str) -> bool:
+    """Verify the kernel driver through VIDIOC_QUERYCAP, not a card label."""
+    if not re.fullmatch(r"/dev/video[0-9]+", path):
+        return False
+    fd = None
+    try:
+        if not stat.S_ISCHR(os.lstat(path).st_mode):
+            return False
+        fd = os.open(path, os.O_RDWR | os.O_NONBLOCK | os.O_NOFOLLOW)
+        if not stat.S_ISCHR(os.fstat(fd).st_mode):
+            return False
+        capability = bytearray(104)
+        # _IOR('V', 0, struct v4l2_capability), size 104 on Linux.
+        fcntl.ioctl(fd, 0x80685600, capability, True)
+        driver = bytes(capability[:16]).split(b"\0", 1)[0]
+        caps, device_caps = struct.unpack_from("=II", capability, 84)
+        effective = device_caps if caps & 0x80000000 else caps
+        return driver == b"v4l2 loopback" and bool(effective & 0x00000002)
+    except OSError:
+        return False
+    finally:
+        if fd is not None:
+            os.close(fd)
 
-    Detects loopback devices by inspecting the sysfs card name; falls back
-    to listing all /dev/video* nodes if sysfs is unavailable.
-    """
-    devices: list[LoopbackDevice] = []
+
+def list_loopback_devices() -> list[LoopbackDevice]:
+    """List writable video-output devices using the v4l2loopback driver."""
+    devices = []
     for dev in sorted(glob.glob("/dev/video*")):
-        idx = dev.replace("/dev/video", "")
-        name = _read(f"/sys/class/video4linux/video{idx}/name")
-        # v4l2loopback devices report the card label / "Dummy video device".
-        is_loopback = (
-            "loopback" in name.lower()
-            or "dummy" in name.lower()
-            or (DEFAULT_CARD_LABEL.lower() in name.lower())
-        )
-        if is_loopback:
-            devices.append(LoopbackDevice(path=dev, name=name or "v4l2loopback"))
+        if is_loopback_device(dev):
+            name = _read(f"/sys/class/video4linux/{os.path.basename(dev)}/name")
+            devices.append(LoopbackDevice(dev, name or "v4l2loopback"))
     return devices
 
 
@@ -122,12 +141,12 @@ def load_module(
         return True, "v4l2loopback already loaded."
 
     cmd = modprobe_command(label=label, video_nr=video_nr)
-    manual = " ".join(cmd)
+    manual = shlex.join(cmd)
 
     if os.geteuid() == 0:
         full = cmd
     elif _have_sudo():
-        full = ["sudo"] + cmd
+        full = ["sudo", "-n"] + cmd
     else:
         return (
             False,
@@ -158,7 +177,7 @@ def unload_module() -> tuple[bool, str]:
     if os.geteuid() == 0:
         full = cmd
     elif _have_sudo():
-        full = ["sudo"] + cmd
+        full = ["sudo", "-n"] + cmd
     else:
         return (
             False,
@@ -181,14 +200,8 @@ def unload_module() -> tuple[bool, str]:
 
 
 def pick_device(preferred: str | None = None) -> str | None:
-    """Choose a loopback device path.
-
-    Returns *preferred* if it exists, otherwise the first detected
-    loopback device, otherwise None.
-    """
-    if preferred and os.path.exists(preferred):
-        return preferred
+    """Never substitute another device for an explicitly requested target."""
+    if preferred:
+        return preferred if is_loopback_device(preferred) else None
     devices = list_loopback_devices()
-    if devices:
-        return devices[0].path
-    return None
+    return devices[0].path if devices else None

@@ -5,6 +5,6 @@ virtual camera device so it can be selected as a webcam in Teams, Zoom,
 Slack, Google Meet and other video applications.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "LinuxShare Contributors"
 __license__ = "MIT"

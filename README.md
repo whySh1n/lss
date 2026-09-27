@@ -1,7 +1,7 @@
 # LinuxShare — share your Linux screen as a virtual webcam
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://miro.medium.com/v2/resize:fit:1358/format:webp/0*nWaYk40syKdArGZM.png)
+[![Tests](https://github.com/whySh1n/linux-screen-share/actions/workflows/test.yml/badge.svg)](https://github.com/whySh1n/linux-screen-share/actions/workflows/test.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
 **LinuxShare** captures your screen (or a selected window on X11) and streams it
@@ -18,15 +18,19 @@ It ships in two flavours:
 | **CLI** | `linuxshare-cli` | terminals, scripts, servers, minimal setups |
 | **GUI** | `linuxshare-gui` | point-and-click monitor/window picking, tray control |
 
-Works on both **X11** (via `ffmpeg -f x11grab`) and **Wayland** (via
+Capture backends are implemented for **X11** (via `ffmpeg -f x11grab`) and **Wayland** (via
 `xdg-desktop-portal` + **PipeWire**).
 
 ---
 
-## Screenshots
+## Validation status
 
-<!-- Add screenshots of the GUI here -->
-_GUI screenshots go here._
+Automated tests cover selection, consent protocol, cancellation, device checks
+and process cleanup. Live compositor/camera interoperability still needs
+validation; see [fix validation](reports/FIXES.md). X11 window capture follows
+FFmpeg's window behavior: obscuring windows may affect captured pixels.
+Use a clean desktop for sensitive material. Closing the app stops capture;
+receiving apps may retain their last frame.
 
 ---
 
@@ -41,7 +45,7 @@ _GUI screenshots go here._
 - 📌 **System tray** icon (show / stop / quit)
 - ⚙️ **Settings** (FPS, device, autostart) saved to `~/.config/linuxshare/config.json`
 - 🧩 Clear **dependency checks** with copy-paste install commands
-- 🧹 Clean shutdown — unloads the module if it loaded it
+- 🧹 Stops child processes on close; leaves shared kernel modules under administrator control
 
 ---
 
@@ -59,23 +63,24 @@ System packages:
 
 ## Installation
 
-### Arch Linux (AUR)
+### User-local source installation
 
 ```bash
-# Using an AUR helper
-yay -S linux-screen-share
-
-# Or manually from the bundled PKGBUILD
-cd packaging/arch
-makepkg -si
+./install.sh --dry-run
+./install.sh
 ```
+
+Install OS dependencies first (below). The script uses a virtual environment,
+not the externally managed system Python. See [installation](docs/install.md).
+The local Arch recipe can be built from `packaging/arch` in a trusted checkout
+with `makepkg -si`; no AUR publication is assumed.
 
 ### Arch Linux (manual)
 
 ```bash
 sudo pacman -S python python-gobject gtk4 libadwaita ffmpeg pipewire \
-    xdg-desktop-portal v4l2loopback-dkms gstreamer gst-plugins-good
-pip install --user .
+    xdg-desktop-portal v4l2loopback-dkms gstreamer gst-plugin-pipewire gst-plugins-base gst-plugins-good xorg-xrandr
+./install.sh
 ```
 
 ### Debian / Ubuntu
@@ -84,12 +89,13 @@ pip install --user .
 sudo apt update
 sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 \
     ffmpeg pipewire xdg-desktop-portal v4l2loopback-dkms \
-    gstreamer1.0-tools gstreamer1.0-plugins-good
-pip install --user .
+    gstreamer1.0-tools gstreamer1.0-pipewire gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good python3-venv x11-xserver-utils
+./install.sh
 ```
 
 > `v4l2loopback-dkms` builds a kernel module. After install, reboot or run
-> `sudo modprobe v4l2loopback` once.
+> `sudo modprobe v4l2loopback exclusive_caps=1 card_label="LinuxShare Virtual Camera"` once.
 
 ---
 
@@ -114,7 +120,7 @@ linuxshare-cli --display HDMI-1 --fps 60 --device /dev/video0
 The tool prints which `/dev/videoN` device is in use, e.g.:
 
 ```
-Sharing screen -> /dev/video0
+Starting capture -> /dev/video0
 Select 'LinuxShare Virtual Camera' as your camera in your video app.
 Press Ctrl+C to stop.
 ```
@@ -162,7 +168,7 @@ systemctl --user status xdg-desktop-portal
 ```
 
 **No video (black frame) in Teams/Zoom**
-- Load the module with `exclusive_caps=1` (LinuxShare does this by default).
+- Load the module with `exclusive_caps=1`.
 - Restart the video app so it re-detects the camera.
 - Confirm frames are flowing: `ffplay /dev/video0`.
 

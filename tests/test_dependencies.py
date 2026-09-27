@@ -91,4 +91,6 @@ def test_session_specific_commands_x11_vs_wayland():
         x11 = {r.name for r in deps.check_dependencies("x11")}
         way = {r.name for r in deps.check_dependencies("wayland")}
     assert "xrandr" in x11
-    assert "pw-record" in way
+    assert "gst-launch-1.0" in way
+    assert "pipewiresrc" in way
+    assert "pw-record" not in way

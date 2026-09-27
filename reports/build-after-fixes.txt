@@ -1,0 +1,199 @@
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77.0
+  - wheel
+* Getting build dependencies for sdist...
+running egg_info
+writing linux_screen_share.egg-info/PKG-INFO
+writing dependency_links to linux_screen_share.egg-info/dependency_links.txt
+writing entry points to linux_screen_share.egg-info/entry_points.txt
+writing requirements to linux_screen_share.egg-info/requires.txt
+writing top-level names to linux_screen_share.egg-info/top_level.txt
+reading manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+* Installed build dependency versions:
+  - setuptools==84.0.0
+  - wheel==0.48.0
+* Building sdist...
+running sdist
+running egg_info
+writing linux_screen_share.egg-info/PKG-INFO
+writing dependency_links to linux_screen_share.egg-info/dependency_links.txt
+writing entry points to linux_screen_share.egg-info/entry_points.txt
+writing requirements to linux_screen_share.egg-info/requires.txt
+writing top-level names to linux_screen_share.egg-info/top_level.txt
+reading manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+running check
+creating linux_screen_share-0.1.1
+creating linux_screen_share-0.1.1/desktop
+creating linux_screen_share-0.1.1/docs
+creating linux_screen_share-0.1.1/icons
+creating linux_screen_share-0.1.1/linux_screen_share.egg-info
+creating linux_screen_share-0.1.1/linuxshare_cli
+creating linux_screen_share-0.1.1/linuxshare_gui
+creating linux_screen_share-0.1.1/man
+creating linux_screen_share-0.1.1/packaging/arch
+creating linux_screen_share-0.1.1/packaging/debian
+creating linux_screen_share-0.1.1/reports
+creating linux_screen_share-0.1.1/tests
+copying files to linux_screen_share-0.1.1...
+copying LICENSE -> linux_screen_share-0.1.1
+copying MANIFEST.in -> linux_screen_share-0.1.1
+copying README.md -> linux_screen_share-0.1.1
+copying install.sh -> linux_screen_share-0.1.1
+copying pyproject.toml -> linux_screen_share-0.1.1
+copying setup.py -> linux_screen_share-0.1.1
+copying desktop/linuxshare.desktop -> linux_screen_share-0.1.1/desktop
+copying docs/install.md -> linux_screen_share-0.1.1/docs
+copying docs/troubleshooting.md -> linux_screen_share-0.1.1/docs
+copying docs/usage-cli.md -> linux_screen_share-0.1.1/docs
+copying docs/usage-gui.md -> linux_screen_share-0.1.1/docs
+copying icons/linuxshare.svg -> linux_screen_share-0.1.1/icons
+copying linux_screen_share.egg-info/PKG-INFO -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linux_screen_share.egg-info/SOURCES.txt -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linux_screen_share.egg-info/dependency_links.txt -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linux_screen_share.egg-info/entry_points.txt -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linux_screen_share.egg-info/requires.txt -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linux_screen_share.egg-info/top_level.txt -> linux_screen_share-0.1.1/linux_screen_share.egg-info
+copying linuxshare_cli/__init__.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/capture.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/dependencies.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/main.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/portal.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/v4l2.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_cli/worker.py -> linux_screen_share-0.1.1/linuxshare_cli
+copying linuxshare_gui/__init__.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/app.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/capture.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/main.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/picker.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/settings.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/tray.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/tray_helper.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying linuxshare_gui/window.py -> linux_screen_share-0.1.1/linuxshare_gui
+copying man/linuxshare-cli.1 -> linux_screen_share-0.1.1/man
+copying packaging/arch/PKGBUILD -> linux_screen_share-0.1.1/packaging/arch
+copying packaging/debian/changelog -> linux_screen_share-0.1.1/packaging/debian
+copying packaging/debian/control -> linux_screen_share-0.1.1/packaging/debian
+copying packaging/debian/copyright -> linux_screen_share-0.1.1/packaging/debian
+copying packaging/debian/rules -> linux_screen_share-0.1.1/packaging/debian
+copying reports/FIXES.md -> linux_screen_share-0.1.1/reports
+copying reports/REVIEW.md -> linux_screen_share-0.1.1/reports
+copying tests/portal_integration.py -> linux_screen_share-0.1.1/tests
+copying tests/test_capture.py -> linux_screen_share-0.1.1/tests
+copying tests/test_dependencies.py -> linux_screen_share-0.1.1/tests
+copying tests/test_installer.py -> linux_screen_share-0.1.1/tests
+copying tests/test_portal.py -> linux_screen_share-0.1.1/tests
+copying tests/test_review_regressions.py -> linux_screen_share-0.1.1/tests
+copying tests/test_security_lifecycle.py -> linux_screen_share-0.1.1/tests
+copying tests/test_v4l2.py -> linux_screen_share-0.1.1/tests
+Writing linux_screen_share-0.1.1/setup.cfg
+Creating tar archive
+removing 'linux_screen_share-0.1.1' (and everything under it)
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77.0
+  - wheel
+* Getting build dependencies for wheel...
+running egg_info
+writing linux_screen_share.egg-info/PKG-INFO
+writing dependency_links to linux_screen_share.egg-info/dependency_links.txt
+writing entry points to linux_screen_share.egg-info/entry_points.txt
+writing requirements to linux_screen_share.egg-info/requires.txt
+writing top-level names to linux_screen_share.egg-info/top_level.txt
+reading manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+* Installed build dependency versions:
+  - setuptools==84.0.0
+  - wheel==0.48.0
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build/lib/linuxshare_cli
+copying linuxshare_cli/worker.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/v4l2.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/portal.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/main.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/dependencies.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/capture.py -> build/lib/linuxshare_cli
+copying linuxshare_cli/__init__.py -> build/lib/linuxshare_cli
+creating build/lib/linuxshare_gui
+copying linuxshare_gui/window.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/tray_helper.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/tray.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/settings.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/picker.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/main.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/capture.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/app.py -> build/lib/linuxshare_gui
+copying linuxshare_gui/__init__.py -> build/lib/linuxshare_gui
+running egg_info
+writing linux_screen_share.egg-info/PKG-INFO
+writing dependency_links to linux_screen_share.egg-info/dependency_links.txt
+writing entry points to linux_screen_share.egg-info/entry_points.txt
+writing requirements to linux_screen_share.egg-info/requires.txt
+writing top-level names to linux_screen_share.egg-info/top_level.txt
+reading manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'linux_screen_share.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/linuxshare_gui
+copying build/lib/linuxshare_gui/__init__.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/app.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/capture.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/main.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/picker.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/settings.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/tray.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/tray_helper.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+copying build/lib/linuxshare_gui/window.py -> build/bdist.linux-x86_64/wheel/./linuxshare_gui
+creating build/bdist.linux-x86_64/wheel/linuxshare_cli
+copying build/lib/linuxshare_cli/__init__.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/capture.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/dependencies.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/main.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/portal.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/v4l2.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+copying build/lib/linuxshare_cli/worker.py -> build/bdist.linux-x86_64/wheel/./linuxshare_cli
+running install_egg_info
+Copying linux_screen_share.egg-info to build/bdist.linux-x86_64/wheel/./linux_screen_share-0.1.1-py3.14.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/linux_screen_share-0.1.1.dist-info/WHEEL
+creating '/tmp/linuxshare-fixed-dist/.tmp-mzluf4lk/linux_screen_share-0.1.1-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'linux_screen_share-0.1.1.dist-info/licenses/LICENSE'
+adding 'linuxshare_cli/__init__.py'
+adding 'linuxshare_cli/capture.py'
+adding 'linuxshare_cli/dependencies.py'
+adding 'linuxshare_cli/main.py'
+adding 'linuxshare_cli/portal.py'
+adding 'linuxshare_cli/v4l2.py'
+adding 'linuxshare_cli/worker.py'
+adding 'linuxshare_gui/__init__.py'
+adding 'linuxshare_gui/app.py'
+adding 'linuxshare_gui/capture.py'
+adding 'linuxshare_gui/main.py'
+adding 'linuxshare_gui/picker.py'
+adding 'linuxshare_gui/settings.py'
+adding 'linuxshare_gui/tray.py'
+adding 'linuxshare_gui/tray_helper.py'
+adding 'linuxshare_gui/window.py'
+adding 'linux_screen_share-0.1.1.dist-info/METADATA'
+adding 'linux_screen_share-0.1.1.dist-info/WHEEL'
+adding 'linux_screen_share-0.1.1.dist-info/entry_points.txt'
+adding 'linux_screen_share-0.1.1.dist-info/top_level.txt'
+adding 'linux_screen_share-0.1.1.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+Successfully built linux_screen_share-0.1.1.tar.gz and linux_screen_share-0.1.1-py3-none-any.whl
