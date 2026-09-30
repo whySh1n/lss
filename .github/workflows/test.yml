@@ -13,10 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install -e '.[dev]' build bandit
+      - run: python -m pip install -e '.[dev,calls]' build bandit
       - run: python -m pytest -q
-      - run: flake8 -j 1 linuxshare_cli linuxshare_gui tests
-      - run: bandit -r linuxshare_cli linuxshare_gui -ll
+      - run: flake8 -j 1 linuxshare_cli linuxshare_gui linuxshare_calls tests
+      - run: bandit -r linuxshare_cli linuxshare_gui linuxshare_calls -ll
       - run: bash -n install.sh && ./install.sh --dry-run
       - run: python -m build
       - run: ./install.sh --prefix "$RUNNER_TEMP/linuxshare test"
@@ -27,3 +27,24 @@ jobs:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y python3-gi dbus
       - run: dbus-run-session -- /usr/bin/python3 tests/portal_integration.py
+  browser-calls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[calls]' playwright
+      - run: python -m playwright install --with-deps chromium
+      - run: |
+          export CHROMIUM_PATH=$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
+          python tests/calls/browser_smoke.py
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pip-audit
+      - run: pip-audit -r deployment/requirements-calls.txt

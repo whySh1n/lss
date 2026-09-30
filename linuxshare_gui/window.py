@@ -31,6 +31,7 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
         self.set_title("LinuxShare")
         self.set_default_size(560, 520)
 
+        self.call_process = None
         self.config = gui_settings.load_config()
         self.controller = gui_capture.CaptureController()
         self.controller.on_state_change = self._on_state_change_threadsafe
@@ -66,6 +67,18 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
         body.set_margin_end(16)
         root.append(body)
 
+        private_button = Gtk.Button(label="Open private screen & voice call")
+        private_button.add_css_class("suggested-action")
+        private_button.connect("clicked", self._on_private_call)
+        body.append(private_button)
+        note = Gtk.Label(
+            label="Calls run in your browser. End or close the host tab to revoke access.",
+            wrap=True,
+            xalign=0,
+        )
+        body.append(note)
+        body.append(Gtk.Separator())
+        body.append(Gtk.Label(label="Virtual camera (Teams / Zoom)", xalign=0))
         self.picker = PickerWidget()
         body.append(self.picker)
 
@@ -77,6 +90,26 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
         self.status_label = Gtk.Label(xalign=0)
         self.status_label.set_markup("<i>Idle</i>")
         body.append(self.status_label)
+
+    def _on_private_call(self, _button):
+        from linuxshare_calls.launcher import open_call
+
+        try:
+            if self.call_process is not None and self.call_process.poll() is None:
+                self._set_status("Local call service is already open in your browser")
+                return
+            self.call_process = open_call()
+            self._set_status(
+                "Private-call page opened. Approve your guest in the browser."
+            )
+        except (OSError, RuntimeError, ValueError) as exc:
+            self._set_status(str(exc), error=True)
+
+    def close_private_calls(self):
+        from linuxshare_calls.launcher import close_call
+
+        close_call(self.call_process)
+        self.call_process = None
 
     # -- Sharing control -------------------------------------------------
 
@@ -117,18 +150,23 @@ class MainWindow(_BaseWindow):  # type: ignore[misc, valid-type]
 
     def _on_close_request(self, *_args):
         self.controller.shutdown()
+        self.close_private_calls()
         self.get_application().quit()
         return False
 
     def _apply_state(self, state: str, message: str) -> bool:
         self.share_button.set_sensitive(True)
-        self.picker.set_sensitive(state not in (
-            gui_capture.CaptureController.STATE_STARTING,
-            gui_capture.CaptureController.STATE_SHARING,
-        ))
+        self.picker.set_sensitive(
+            state
+            not in (
+                gui_capture.CaptureController.STATE_STARTING,
+                gui_capture.CaptureController.STATE_SHARING,
+            )
+        )
         if self.get_application().tray:
             self.get_application().tray.set_sharing(
-                state == gui_capture.CaptureController.STATE_SHARING)
+                state == gui_capture.CaptureController.STATE_SHARING
+            )
         if state == gui_capture.CaptureController.STATE_SHARING:
             self.share_button.set_label("Stop sharing")
             self._set_status(f"Sharing on {message}")

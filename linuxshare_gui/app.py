@@ -94,6 +94,7 @@ class LinuxShareApp(_AppBase):  # type: ignore[misc, valid-type]
     def do_shutdown(self) -> None:
         if self.window is not None:
             self.window.controller.shutdown()
+            self.window.close_private_calls()
         if self.tray is not None:
             self.tray.close()
         _AppBase.do_shutdown(self)
@@ -101,4 +102,5 @@ class LinuxShareApp(_AppBase):  # type: ignore[misc, valid-type]
     def _quit(self) -> None:
         if self.window is not None:
             self.window.controller.shutdown()
+            self.window.close_private_calls()
         self.quit()

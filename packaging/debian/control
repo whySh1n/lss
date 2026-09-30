@@ -14,6 +14,7 @@ Package: linux-screen-share
 Architecture: all
 Depends: ${python3:Depends},
          ${misc:Depends},
+         python3-aiohttp (>= 3.14.3),
          python3-gi,
          python3-gi-cairo,
          gir1.2-gtk-4.0,

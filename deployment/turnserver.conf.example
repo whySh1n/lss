@@ -1,0 +1,33 @@
+# Example only: configure your own domain, external IP mapping and valid TLS certs.
+# Install/operate coturn separately, or use a private managed TURN service.
+listening-port=3478
+tls-listening-port=5349
+fingerprint
+use-auth-secret
+static-auth-secret=REPLACE_WITH_THE_SERVER_TURN_SECRET
+realm=turn.example.org
+cert=/path/to/turn-fullchain.pem
+pkey=/path/to/turn-private-key.pem
+min-port=49160
+max-port=49200
+user-quota=4
+total-quota=128
+max-bps=1250000
+no-cli
+no-multicast-peers
+no-tcp-relay
+# Deny access to internal infrastructure through TURN.
+denied-peer-ip=0.0.0.0-0.255.255.255
+denied-peer-ip=10.0.0.0-10.255.255.255
+denied-peer-ip=100.64.0.0-100.127.255.255
+denied-peer-ip=127.0.0.0-127.255.255.255
+denied-peer-ip=169.254.0.0-169.254.255.255
+denied-peer-ip=172.16.0.0-172.31.255.255
+denied-peer-ip=192.168.0.0-192.168.255.255
+denied-peer-ip=224.0.0.0-255.255.255.255
+denied-peer-ip=::1
+denied-peer-ip=fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+# Disable verbose/session logging; also review your distro service's log settings.
+no-stdout-log
+log-file=/dev/null

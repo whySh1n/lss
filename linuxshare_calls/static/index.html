@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LinuxShare · Private call</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+  <header><div class="brand"><span class="mark">↗</span> LinuxShare</div><span class="pill">One host · One guest</span></header>
+  <section class="intro"><p class="eyebrow">A private space to share</p><h1>Your screen. A conversation.</h1>
+    <p>Invite one person, approve their access, and talk while you share.</p></section>
+  <p id="local-warning" class="notice" hidden>Local test only. This address works on this computer, not across the internet.</p>
+  <div id="status" class="status" role="status" aria-live="polite">Ready to create a private call.</div>
+  <div class="layout">
+    <section class="stage" aria-label="Shared screen">
+      <div id="placeholder"><span class="screen-icon">▣</span><h2>Nothing is being shared</h2><p>Your screen and microphone stay off until you choose to enable them.</p></div>
+      <video id="screen" autoplay playsinline muted hidden></video>
+      <audio id="voice" autoplay></audio>
+      <button id="listen" hidden>Enable incoming audio</button>
+    </section>
+    <aside>
+      <section id="create-panel" class="card">
+        <h2>Start a call</h2><p>Use the creation key supplied by your service administrator.</p>
+        <label for="creation-key">Creation key</label><input id="creation-key" type="password" autocomplete="off" spellcheck="false">
+        <button id="create">Create private invitation</button>
+      </section>
+      <section id="join-panel" class="card" hidden>
+        <h2>You’re invited</h2><p>The host must approve you before any screen or voice is sent.</p>
+        <label for="guest-name">Name shown to the host</label><input id="guest-name" maxlength="60" autocomplete="off">
+        <button id="join">Request to join</button>
+      </section>
+      <section id="invite-panel" class="card" hidden>
+        <h2>Invite one person</h2><p id="invite-expiry"></p>
+        <label for="invite-link">Single-use link</label><input id="invite-link" readonly spellcheck="false">
+        <button id="copy" class="secondary">Copy invitation</button>
+        <p class="small">Send it privately. Names are not verified identities.</p>
+      </section>
+      <section id="approval-panel" class="card" hidden>
+        <h2>Someone is waiting</h2><p id="guest-description"></p>
+        <p>Confirm this code with your guest through a separate trusted channel:</p><strong id="host-code" class="code"></strong>
+        <button id="approve">Approve this guest</button><button id="reject" class="danger">Reject & revoke invitation</button>
+      </section>
+      <section id="guest-code-panel" class="card" hidden><h2>Your verification code</h2><strong id="guest-code" class="code"></strong><p>Tell the host this code through your trusted contact channel. It identifies this connection, not your legal identity.</p></section>
+      <section id="controls" class="card" hidden>
+        <h2 id="control-heading">Call controls</h2>
+        <button id="prepare" hidden>Share screen & enable microphone</button>
+        <button id="mute" class="secondary" hidden>Mute microphone</button>
+        <button id="end" class="danger">End call & revoke access</button>
+        <p class="small">Ending the call invalidates this invitation permanently. A new call needs a new link.</p>
+      </section>
+    </aside>
+  </div>
+  <footer>Encrypted media · No built-in recording · Guest access ends with the call.<br>
+  Your guest can still record or photograph what they receive. Only share with someone you trust.</footer>
+</main>
+</body>
+</html>

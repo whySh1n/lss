@@ -1,3 +1,10 @@
+linux-screen-share (0.2.0-1) unstable; urgency=medium
+
+  * Add private browser-link calls with host approval and revocable access.
+  * Preserve virtual camera mode and add signaling/browser security tests.
+
+ -- LinuxShare Contributors  Wed, 30 Sep 2026 18:00:00 +0100
+
 linux-screen-share (0.1.1-1) unstable; urgency=medium
 
   * Fix portal consent, source selection, capture cleanup and device validation.

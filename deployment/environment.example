@@ -1,0 +1,6 @@
+# Copy to /etc/linuxshare-calls.env, owned by root, mode 0600.
+# Replace every placeholder. Generate independent secrets; do not commit them.
+LINUXSHARE_ORIGIN=https://calls.example.org
+LINUXSHARE_CREATE_KEY=REPLACE_WITH_A_RANDOM_SECRET
+LINUXSHARE_TURN_URLS=turns:turn.example.org:5349?transport=tcp,turn:turn.example.org:3478?transport=udp
+LINUXSHARE_TURN_SECRET=REPLACE_WITH_A_DIFFERENT_RANDOM_SECRET

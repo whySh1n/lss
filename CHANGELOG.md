@@ -1,3 +1,12 @@
+# Changes in 0.2.0
+
+- Add one-to-one browser-link calls with screen sharing and two-way voice.
+- Add host approval, expiring single-use invitations, role-scoped tokens,
+  end-call revocation, disconnect leases and media cleanup.
+- Add HTTPS/TURN deployment templates and a loopback-only demonstration launcher.
+- Add protocol/security tests and real Chromium WebRTC tests using synthetic media.
+- Keep existing virtual-camera mode available separately.
+
 # Changes in 0.1.1
 
 - Implement Wayland ScreenCast consent, authorized PipeWire FD transfer and cancellation.

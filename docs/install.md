@@ -105,7 +105,7 @@ From a trusted checkout, run:
 ~/.local/bin/linuxshare-cli --check
 ```
 
-The script installs this checkout into `~/.local/lib/linuxshare-venv`, with
+The script installs the private-calls dependencies and this checkout into `~/.local/lib/linuxshare-venv`, with
 launchers in `~/.local/bin`. Add that bin directory to your PATH if necessary.
 Use `--prefix /absolute/path` to choose another destination. Python 3.10+,
 venv and pip are required (Debian/Ubuntu: `python3-venv`). Build dependencies
@@ -115,8 +115,9 @@ System dependencies above must be installed separately. The script does not
 use sudo, load kernel modules, start capture, configure login startup, or add
 a desktop menu entry. It refuses existing destinations, including symlinks.
 If installation fails, it leaves the environment for inspection; remove that
-specific environment before retrying. To uninstall, remove the two installed
-launcher symlinks and the `lib/linuxshare-venv` directory under your chosen
+specific environment before retrying. To uninstall, remove the four installed
+launcher symlinks (`linuxshare-cli`, `linuxshare-gui`, `linuxshare-call`, and
+`linuxshare-call-server`) and the `lib/linuxshare-venv` directory under your chosen
 prefix. Do not remove the entire prefix.
 
 See [fix validation](../reports/FIXES.md) for the automated results and remaining
@@ -124,3 +125,12 @@ live compositor/camera test requirements. Install the portal backend matching
 your desktop (GNOME, KDE, Hyprland, or wlroots); the generic portal package
 alone is insufficient. The optional tray uses a separate GTK3 process and
 requires AppIndicator or Ayatana AppIndicator bindings.
+
+## Private calls
+
+The installer includes `aiohttp` for calls, with distro GTK bindings shared by
+the venv. `linuxshare-call` opens a local same-computer demonstration by default.
+Internet links need [HTTPS/TURN deployment](private-calls.md); installation on
+your desktop alone does not create public hosting. Existing installs can be
+updated deliberately with `~/.local/lib/linuxshare-venv/bin/python -m pip install
+'.[calls]'` from the trusted checkout; `install.sh` itself refuses overwrites.

@@ -6,3 +6,7 @@ recursive-include man *
 recursive-include packaging *
 recursive-include reports *.md
 recursive-include tests *.py
+
+recursive-include linuxshare_calls/static *
+recursive-include deployment *
+include SECURITY.md

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "linux-screen-share"
-version = "0.1.1"
-description = "Share your Linux screen as a virtual webcam (CLI + GTK4 GUI)"
+version = "0.2.0"
+description = "Private screen and voice calls, plus a Linux virtual camera"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -28,11 +28,14 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
+calls = ["aiohttp>=3.14.3,<4"]
 gui = ["PyGObject>=3.42"]
 dev = [
     "pytest>=7.0",
     "flake8>=6.0",
     "black>=23.0",
+    "pytest-asyncio>=0.24",
+    "pytest-aiohttp>=1.0",
 ]
 
 [project.urls]
@@ -41,11 +44,16 @@ Repository = "https://github.com/whySh1n/linux-screen-share"
 Issues = "https://github.com/whySh1n/linux-screen-share/issues"
 
 [project.scripts]
+linuxshare-call = "linuxshare_calls.launcher:main"
+linuxshare-call-server = "linuxshare_calls.server:main"
 linuxshare-cli = "linuxshare_cli.main:main"
 linuxshare-gui = "linuxshare_gui.main:main"
 
 [tool.setuptools]
-packages = ["linuxshare_cli", "linuxshare_gui"]
+packages = ["linuxshare_cli", "linuxshare_gui", "linuxshare_calls", "linuxshare_calls.static"]
+
+[tool.setuptools.package-data]
+linuxshare_calls = ["static/*"]
 
 [tool.black]
 line-length = 88

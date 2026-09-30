@@ -1,0 +1,7 @@
+# Replace this hostname with a domain you control. DNS must point here.
+calls.example.org {
+    # Caddy provisions/renews HTTPS. Keep the Python port loopback-only.
+    reverse_proxy 127.0.0.1:8787
+    header -Server
+    # Intentionally no access log. Do not add URL/body/token logging upstream.
+}

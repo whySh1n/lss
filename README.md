@@ -4,7 +4,8 @@
 [![Tests](https://github.com/whySh1n/linux-screen-share/actions/workflows/test.yml/badge.svg)](https://github.com/whySh1n/linux-screen-share/actions/workflows/test.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
-**LinuxShare** captures your screen (or a selected window on X11) and streams it
+**LinuxShare** offers private screen/voice calls and a separate virtual-camera mode.
+The virtual-camera mode captures your screen (or a selected window on X11) and streams it
 into a [`v4l2loopback`](https://github.com/umlaeute/v4l2loopback) virtual camera
 device. That virtual camera then appears as a normal webcam inside **Microsoft
 Teams, Zoom, Slack, Google Meet** and any other app that reads a V4L2 device —
@@ -33,6 +34,21 @@ Use a clean desktop for sensitive material. Closing the app stops capture;
 receiving apps may retain their last frame.
 
 ---
+
+## Private browser-link calls (new in 0.2)
+
+Open **Private screen & voice call** in LinuxShare, or run `linuxshare-call`.
+Share a single-use link, approve one guest, and talk while sharing a screen.
+The guest needs only a browser. **End call & revoke access** stops media and
+invalidates the invitation; old links cannot reconnect.
+
+The default launch is a **same-computer local demonstration**. Internet calls
+require your own HTTPS signaling deployment and private TURN service; no public
+hosting is bundled. Set `LINUXSHARE_CALL_URL` to your deployed service.
+See [private calls and deployment](docs/private-calls.md) and
+[security model](SECURITY.md). No product can guarantee 100% security or erase
+recordings made by a recipient. Calls run in a browser tab; close/end that tab
+to revoke remote access.
 
 ## Features
 

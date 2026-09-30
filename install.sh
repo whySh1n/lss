@@ -24,7 +24,7 @@ done
 [[ $EUID -ne 0 ]] || { echo 'Run as your normal user, not root or sudo.' >&2; exit 1; }
 source_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 venv="$prefix/lib/linuxshare-venv"
-for target in "$venv" "$prefix/bin/linuxshare-cli" "$prefix/bin/linuxshare-gui"; do
+for target in "$venv" "$prefix/bin/linuxshare-cli" "$prefix/bin/linuxshare-gui" "$prefix/bin/linuxshare-call" "$prefix/bin/linuxshare-call-server"; do
     if [[ -e "$target" || -L "$target" ]]; then
         echo "Refusing to overwrite: $target" >&2
         exit 1
@@ -42,12 +42,15 @@ mkdir -- "$venv"
 echo 'Creating environment; a failed install may leave this directory for inspection.'
 python3 -m venv --system-site-packages "$venv"
 # Do not install PyGObject from pip: it must match the system GTK libraries.
-"$venv/bin/python" -m pip --isolated install --no-deps "$source_dir"
+"$venv/bin/python" -m pip --isolated install "${source_dir}[calls]"
 "$venv/bin/linuxshare-cli" --version
 ln -s -- "$venv/bin/linuxshare-cli" "$prefix/bin/linuxshare-cli"
 ln -s -- "$venv/bin/linuxshare-gui" "$prefix/bin/linuxshare-gui"
+for command in linuxshare-call linuxshare-call-server; do
+    ln -s -- "$venv/bin/$command" "$prefix/bin/$command"
+done
 printf '\nInstalled. Add %s/bin to PATH if needed.\n' "$prefix"
 cat <<'NOTICE'
 Run linuxshare-cli --check before use. See docs/install.md for OS dependencies.
-See reports/FIXES.md for validation results and remaining desktop test limits.
+Run linuxshare-call for a local demonstration. See docs/private-calls.md for internet deployment.
 NOTICE
